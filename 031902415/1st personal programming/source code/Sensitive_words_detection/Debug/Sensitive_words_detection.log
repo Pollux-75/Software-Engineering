@@ -1,6 +1,0 @@
-﻿  main.cpp
-D:\Software-Engineering\031902415\source code\Sensitive_words_detection\main.cpp(22,2): error C2143: 语法错误: 缺少“;”(在“<template-id>”的前面)
-D:\Software-Engineering\031902415\source code\Sensitive_words_detection\main.cpp(31,1): error C2362: “goto words”跳过了“%pS”的初始化操作
-D:\Software-Engineering\031902415\source code\Sensitive_words_detection\main.cpp(21): message : 参见“words”的声明
-D:\Software-Engineering\031902415\source code\Sensitive_words_detection\main.cpp(31,1): error C2362: “goto s_temp”跳过了“%pS”的初始化操作
-D:\Software-Engineering\031902415\source code\Sensitive_words_detection\main.cpp(21): message : 参见“s_temp”的声明

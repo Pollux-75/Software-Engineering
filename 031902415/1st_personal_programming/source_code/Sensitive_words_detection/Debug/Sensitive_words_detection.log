@@ -1,0 +1,7 @@
+﻿  main.cpp
+  test_field.cpp
+D:\Software-Engineering\031902415\1st_personal_programming\source_code\Sensitive_words_detection\test_field.cpp(17,23): warning C4018: “<”: 有符号/无符号不匹配
+D:\Software-Engineering\031902415\1st_personal_programming\source_code\Sensitive_words_detection\test_field.cpp(44,27): warning C4018: “<”: 有符号/无符号不匹配
+D:\Software-Engineering\031902415\1st_personal_programming\source_code\Sensitive_words_detection\test_field.cpp(4635,22): warning C4834: 放弃具有 "nodiscard" 属性的函数的返回值
+  正在生成代码...
+  Sensitive_words_detection.vcxproj -> D:\Software-Engineering\031902415\1st_personal_programming\source_code\Sensitive_words_detection\Debug\Sensitive_words_detection.exe

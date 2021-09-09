@@ -1,0 +1,3 @@
+D:\Software-Engineering\031902415\source code\Sensitive_words_detection\Debug\Sensitive_words_detection.exe
+D:\Software-Engineering\031902415\1st personal programming\source code\Sensitive_words_detection\Debug\Sensitive_words_detection.exe
+D:\Software-Engineering\031902415\1st_personal_programming\source_code\Sensitive_words_detection\Debug\Sensitive_words_detection.exe
