@@ -4,19 +4,26 @@
 using namespace std;
 
 /*--------------------------------------------------*/
-struct word
+class word
 {
-	bool isEnd = false;
+public:
+	bool isEnd;		// 是否为敏感词最后一个字
+	int num;				// 为第几个敏感词
 	unordered_map<string, word> next;
+
+	word(bool isEnd=false, int num=-1)
+	{
+		this->isEnd = isEnd;
+		this->num = num;
+	}
 };
 
 ifstream file_in_words;
 ifstream file_in_org;
 ofstream file_out_ans;
 
-string s_temp;			// 用于读入文件中的每行
-unordered_map<string, word> words_hash_table;
-// words_hash_table表示敏感词表
+vector<string> words_string;			// 敏感词表（用于提取）
+unordered_map<string, word> words_hash;	// 敏感词哈希表（用于查找）
 
 /*--------------------------------------------------*/
 
@@ -54,7 +61,9 @@ void open_file(char* argv[])	// 打开文件
 		exit(0);
 	}
 }
+
 /*--------------------------------------------------*/
+
 void close_file()	// 关闭文件
 {
 	// 关闭文件
@@ -63,6 +72,7 @@ void close_file()	// 关闭文件
 	file_out_ans.close();
 	cout << "程序运行完成";
 }
+
 /*--------------------------------------------------*/
 
 static string UTF8ToGBK(const char* strUTF8)	// UTF8转GBK
@@ -85,17 +95,19 @@ static string UTF8ToGBK(const char* strUTF8)	// UTF8转GBK
 
 void get_words()	// 获得敏感词列表
 {
-	while (getline(file_in_words,s_temp))
+	int word_num = 0;	// 用来记录敏感词序号
+	string s_temp;	// 用来临时读取每一个敏感词
+	while (getline(file_in_words,s_temp))	// 读入一个敏感词
 	{
-		// 读入一个敏感词
 		int i_temp=0, l_temp;
-		unordered_map<string, word> *word_hash_temp = &words_hash_table;
-		// word_hash_temp是临时的敏感词表节点
-		// words_hash_table是全部敏感词表
+		unordered_map<string, word> *word_hash_temp = &words_hash;
+		// word_hash_temp是临时的敏感词表节点（指向当前的敏感词的某个位置）
+		// words_hash是全部敏感词哈希表
 
 		s_temp = UTF8ToGBK(s_temp.data());		// UTF8转GBK
 		l_temp = s_temp.length();				// 获得s_temp长度
 
+		words_string.push_back(s_temp);	// 把敏感词存入敏感词表，word_num是该敏感词的下标
 		while (i_temp < l_temp)	// 遍历s_temp，每次处理一个汉字/字母
 		{
 			string word_string_temp = "";
@@ -114,7 +126,7 @@ void get_words()	// 获得敏感词列表
 
 			if (!(*word_hash_temp).count(word_string_temp))	// 如果当前汉字/字母在表头不存在										// 如果当前汉字/字母在表头
 			{
-				(*word_hash_temp)[word_string_temp] = *(new word);	
+				(*word_hash_temp)[word_string_temp] = *(new word(false, word_num));
 				// 新建该汉字/字母
 			}
 
@@ -128,6 +140,7 @@ void get_words()	// 获得敏感词列表
 				// 移动到该汉字/字母的位置
 			}
 		}
+		word_num++;	// 敏感词序号加1
 	}
 }
 /*--------------------------------------------------*/
