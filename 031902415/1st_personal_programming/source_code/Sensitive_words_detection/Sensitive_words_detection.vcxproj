@@ -142,8 +142,11 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="chinese_pinyin.cpp" />
     <ClCompile Include="main.cpp" />
-    <ClCompile Include="test_field.cpp" />
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="modular.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
