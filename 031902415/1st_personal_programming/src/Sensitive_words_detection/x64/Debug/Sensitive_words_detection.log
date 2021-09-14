@@ -1,0 +1,10 @@
+﻿  file_io.cpp
+  main.cpp
+D:\Software-Engineering\031902415\1st_personal_programming\src\Sensitive_words_detection\main.cpp(93,49): warning C4267: “初始化”: 从“size_t”转换到“int”，可能丢失数据
+D:\Software-Engineering\031902415\1st_personal_programming\src\Sensitive_words_detection\main.cpp(136,30): warning C4267: “初始化”: 从“size_t”转换到“int”，可能丢失数据
+D:\Software-Engineering\031902415\1st_personal_programming\src\Sensitive_words_detection\main.cpp(330,35): warning C4267: “初始化”: 从“size_t”转换到“int”，可能丢失数据
+  sth_to_sth.cpp
+D:\Software-Engineering\031902415\1st_personal_programming\src\Sensitive_words_detection\sth_to_sth.cpp(101,43): warning C4267: “初始化”: 从“size_t”转换到“int”，可能丢失数据
+D:\Software-Engineering\031902415\1st_personal_programming\src\Sensitive_words_detection\sth_to_sth.cpp(101,43): warning C4267: “初始化”: 从“size_t”转换到“const int”，可能丢失数据
+  正在生成代码...
+  Sensitive_words_detection.vcxproj -> D:\Software-Engineering\031902415\1st_personal_programming\src\Sensitive_words_detection\x64\Debug\Sensitive_words_detection.exe
