@@ -112,11 +112,6 @@ void put_full_pinyin_into_words_hash(string word_string_temp, int word_num,
 		}
 	}
 
-	/*-------------------------*/
-	// 实行拼音首字母的识别
-	
-	/*-------------------------*/
-
 	return;
 }
 
@@ -349,9 +344,10 @@ void deal_org(unordered_map<string, word>* now_hash)	// 对文本检测
 void write_ans()
 {
 	file_out_ans << "Total: " << ans.size() << endl;
+
 	for (std::vector<ans_word>::iterator it = ans.begin(); it != ans.end(); ++it)
 	{
-		file_out_ans << "Line" << (*it).line_num << ": <" << words_string[(*it).type_num] << "> " << (*it).word_find << endl;
+		file_out_ans << "Line" << (*it).line_num << ": <" << GBKToUTF8(words_string[(*it).type_num].data()) << "> " << GBKToUTF8((*it).word_find.data()) << endl;
 		// 注意：word_find即找到的敏感词在输出的时候要保留分隔符
 	}
 }

@@ -11,6 +11,9 @@ void close_file(ifstream& file_in_words, ifstream& file_in_org, ofstream& file_o
 // UTF8תGBK
 string UTF8ToGBK(const char* strUTF8);
 
+// GBKתUTF8
+string GBKToUTF8(const char* src_str);
+
 // intתstring
 string int_to_char_to_string(int a);
 
