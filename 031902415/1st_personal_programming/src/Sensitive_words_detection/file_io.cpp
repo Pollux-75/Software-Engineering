@@ -1,5 +1,6 @@
 #include <iostream>
 #include <fstream>
+#include "modular.h"
 using namespace std;
 
 // 打开文件
@@ -11,16 +12,18 @@ void open_file(char* argv[], ifstream& file_in_words, ifstream& file_in_org,
 	// *argv[2]:待检测文件
 	// *argv[3]:答案文件
 
-/*
+
 	file_in_words.open(argv[1]);
 	file_in_org.open(argv[2]);
 	file_out_ans.open(argv[3]);
-*/
+
 
 // 直接从sln同个目录下读文件（方便debug），在最终阶段需要改成在控制台读
+/*
 	file_in_words.open("words.txt");
 	file_in_org.open("org.txt");
 	file_out_ans.open("ans.txt");
+*/
 
 
 	// 文件打开失败，说明并结束程序

@@ -1,17 +1,21 @@
 #include <iostream>
 #include "windows.h"
+#include "modular.h"
 using namespace std;
 
 // UTF8转GBK
 string UTF8ToGBK(const char* strUTF8)
 {
 	int len = MultiByteToWideChar(CP_UTF8, 0, strUTF8, -1, NULL, 0);
-	wchar_t* wszGBK = new wchar_t[len + 1];
-	memset(wszGBK, 0, len * 2 + 2);
+	long long len_p1 = len + 1;
+	wchar_t* wszGBK = static_cast<wchar_t*>(new wchar_t[len_p1]);
+	memset(wszGBK, 0, static_cast<long long>(len) * 2 + 2);
 	MultiByteToWideChar(CP_UTF8, 0, strUTF8, -1, wszGBK, len);
 	len = WideCharToMultiByte(CP_ACP, 0, wszGBK, -1, NULL, 0, NULL, NULL);
-	char* szGBK = new char[len + 1];
-	memset(szGBK, 0, len + 1);
+	long long len_p2 = len + 1;
+	char* szGBK = static_cast<char*>(new char[len_p2]);
+	long long len_p3 = len + 1;
+	memset(szGBK, 0, static_cast<int>(len_p3));
 	WideCharToMultiByte(CP_ACP, 0, wszGBK, -1, szGBK, len, NULL, NULL);
 	string strTemp(szGBK);
 	if (wszGBK) delete[] wszGBK;
@@ -23,12 +27,12 @@ string UTF8ToGBK(const char* strUTF8)
 string GBKToUTF8(const char* src_str)
 {
 	int len = MultiByteToWideChar(CP_ACP, 0, src_str, -1, NULL, 0);
-	wchar_t* wstr = new wchar_t[len + 1];
-	memset(wstr, 0, len + 1);
+	wchar_t* wstr = static_cast<wchar_t*>(new wchar_t[len + 1]);
+	memset(wstr, 0, static_cast<int>(len + 1));
 	MultiByteToWideChar(CP_ACP, 0, src_str, -1, wstr, len);
 	len = WideCharToMultiByte(CP_UTF8, 0, wstr, -1, NULL, 0, NULL, NULL);
-	char* str = new char[len + 1];
-	memset(str, 0, len + 1);
+	char* str = static_cast<char*>(new char[len + 1]);
+	memset(str, 0, static_cast<int>(len + 1));
 	WideCharToMultiByte(CP_UTF8, 0, wstr, -1, str, len, NULL, NULL);
 	string strTemp = str;
 	if (wstr) delete[] wstr;
@@ -115,7 +119,7 @@ int ChineseConvertPy(string& dest_chinese, string& out_py) {
 
 	try {
 		// 循环处理字节数组
-		const int length = dest_chinese.length();
+		const int length = static_cast<const int>(dest_chinese.length());
 		for (int j = 0, chrasc = 0; j < length;) {
 			// 非汉字处理
 			if (dest_chinese.at(j) >= 0 && dest_chinese.at(j) < 128) {

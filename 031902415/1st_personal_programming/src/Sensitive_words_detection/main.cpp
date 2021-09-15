@@ -90,7 +90,7 @@ void put_full_pinyin_into_words_hash(string word_string_temp, int word_num,
 	string pinyin_string = "";
 	if (ChineseConvertPy(word_string_temp, pinyin_string)) cout << "拼音转换失败";
 
-	int i_temp = 0, l_temp = pinyin_string.length();
+	int i_temp = 0, l_temp = static_cast<int>(pinyin_string.length());
 	unordered_map<string, word>* pinyin_hash = head_hash;
 	
 	for (i_temp = 0; i_temp < l_temp; i_temp++)
@@ -127,8 +127,8 @@ void put_head_pinyin_into_words_hash(string word_string_temp, int word_num,
 // 把单个敏感词放入words_hash以供之后查找判断
 void put_into_words_hash(string s_temp,int word_num)
 {
-	int i_temp = 0;
-	int l_temp = s_temp.length();				// 获得s_temp长度
+	long long i_temp = 0;
+	int l_temp = static_cast<int>(s_temp.length());				// 获得s_temp长度
 	unordered_map<string, word>* word_hash_temp = &words_hash;
 	// word_hash_temp是临时的敏感词表节点（指向当前的敏感词的某个位置）
 	// words_hash是全部敏感词哈希表
@@ -239,8 +239,10 @@ void have_words(int i,int l, unordered_map<string, word>* get_now_hash)
 			}
 			else
 			{
-				c_to_s = c_to_s + sentence[i] + sentence[i + 1];
-				i += 2;
+				c_to_s = c_to_s + sentence[i];
+				i++; 
+				c_to_s = c_to_s + sentence[i];
+				i++;
 				is_chinese = true;
 
 				if (word_stack.size() == 0) return;
@@ -254,7 +256,8 @@ void have_words(int i,int l, unordered_map<string, word>* get_now_hash)
 			string s_temp = "";		// s_temp用来临时记录一个汉字/字母
 			if (sentence[i] & 0x80)
 			{
-				s_temp = s_temp + sentence[i] + sentence[i + 1];	// 若为汉字
+				int i_p = i + 1;
+				s_temp = s_temp + sentence[i] + sentence[i_p];	// 若为汉字
 				is_chinese = true;
 			}
 			else
@@ -322,7 +325,7 @@ void deal_org(unordered_map<string, word>* now_hash)	// 对文本检测
 	{
 		// sentence得到当前的一句话，检测其中的敏感词
 		sentence = UTF8ToGBK(sentence.data());	// UTF8转GBK
-		int i = 0, l = sentence.length();
+		int i = 0, l = static_cast<int>(sentence.length());
 		
 		for (i = 0; i < l;)		// 从每个字检测敏感词
 		{
