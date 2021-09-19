@@ -12,13 +12,14 @@ global dfa_tree  # 建成的敏感词树
 global symbol  # 无效符号集合
 global word_stack  # 词栈，用来保存检查过程中发现的一个敏感词
 global words_map  # 映射表，保存敏感词各个单字的各种情况，注意是单字，末尾以原版敏感词单字为结尾
+global flag  # 全局信号，判断某个敏感词是否走通
 
 symbol = ['!', '@', '#', '$', '%', '^', '&', '*', '(', ')', '_', '+', '-', '=',
           '|', '\\', '[', ']', '{', '}', ';', ':', "'", '"', ',', '.', '<', '>',
           '/', '?', '`', '~', '1', '2', '3', '4', '5', '6', '7', '8', '9', '0',
           '！', '@', '#', '￥', '%', '……', '…', '&', '*', '（', '）', '——', '-', '+',
           '=', '【', '】', '{', '}', '|', '、', '；', '：', '‘', '“', '，', '。',
-          '《', '》', '/', '？', '·', '~', ' ']
+          '《', '》', '/', '？', '·', '~', ' ', '—']
 
 
 # 半角，数字，全角符号
@@ -63,9 +64,10 @@ class DFA:
             words_map.dict[word[0]].dict[word[0]] = DFA(word_type, True)  # 无则添加
         if is_chinese(word[0]):  # word[0] 是否为中文
             # 添加映射：字本身 -> 字本身
-            add_pinyin_to_words_map(words_map, word[0], word_type)  # 对 映射表 添加 拼音识别
-            # 添加映射：拼音 -> 字本身
-
+            add_full_pinyin_to_words_map(words_map, word[0], word_type)  # 对 映射表 添加 全拼音识别
+            # 添加映射：全拼音 -> 字本身
+            add_title_pinyin_to_words_map(words_map, word[0], word_type) # 对 映射表 添加 首拼音识别
+            # 添加映射：首拼音 -> 字本身
 
         if len(word) >= 2:  # 不是最后一个字
             self.dict[word[0]].add_sensitive_word(word.lstrip(word[0]), word_type)
@@ -79,8 +81,20 @@ def is_chinese(ch):
     return False
 
 
-def add_pinyin_to_words_map(now_map, single_word, word_type):
-    single_word_pinyin = lazy_pinyin(single_word)  # 转换拼音
+def add_full_pinyin_to_words_map(now_map, single_word, word_type):
+    single_word_pinyin = lazy_pinyin(single_word)  # 转换全拼音
+    for i in single_word_pinyin[0]:  # 每个拼音字母加入words_map
+        if i not in now_map.dict:
+            now_map.dict[i] = DFA(word_type)
+        now_map = now_map.dict[i]
+
+    if single_word not in now_map.dict:
+        now_map.dict[single_word] = DFA(word_type)
+        now_map.dict[single_word].is_end = True
+
+
+def add_title_pinyin_to_words_map(now_map, single_word, word_type):
+    single_word_pinyin = pinyin(single_word, style=Style.FIRST_LETTER)  # 转换首拼音
     for i in single_word_pinyin[0]:  # 每个拼音字母加入words_map
         if i not in now_map.dict:
             now_map.dict[i] = DFA(word_type)
@@ -133,10 +147,13 @@ def deal_words():  # 处理敏感词表，建立敏感词查询表
         dfa_tree.add_sensitive_word(word, word_type)  # 把word放入敏感词查询表
 
 
-def find_word(sentence, i, line_num):  # 从sentence下标i开始，目标是找到整个敏感词
+def find_word(sentence, i, line_num, now_dfa_tree):  # 从sentence下标i开始，目标是找到整个敏感词
     global word_stack
+    global flag
 
-    now_dfa_tree = dfa_tree
+    flag = False
+    # 每一次找新的敏感词都要复原为False，只需要走通一次，find_word函数的功能就算实现了
+
     while i < len(sentence):
         # 找下一个单字前，拉入干扰符号
         while i < len(sentence) and sentence[i] in symbol:  # 从整个敏感词的层面看，无效符号放入词栈
@@ -144,35 +161,42 @@ def find_word(sentence, i, line_num):  # 从sentence下标i开始，目标是找
             i += 1
 
         # 直到不是干扰符号，开始找单字
-        j = i;
+        j = i
         now_map = words_map
 
         # 第一个不是干扰符号的字，不在映射表中，则表示敏感词被“非干扰符号”分割了
-        if j >= len(sentence) or sentence[j] not in now_map.dict:
+        if j >= len(sentence) or sentence[j].lower() not in now_map.dict:
             return 1  # 敏感词被打断，单步前进
         else:
             # 这里认为单字不能被干扰字符打断，如果有单字，应当是完整的，跟着映射表走直到（找到源字）或者（被打断）
-            while j < len(sentence) and sentence[j] in now_map.dict:
-                now_map = now_map.dict[sentence[j]]
+            while j < len(sentence) and sentence[j].lower() in now_map.dict:
+                now_map = now_map.dict[sentence[j].lower()]
                 j += 1
             # 走不通了，当前j落在走不通的位置，now_map是最后走的通的位置
             find_origin_word = False  # 是否找到源字
             origin_word_is_end = False  # 源字是否为某个敏感词的最后一个字
             origin_word_type = -1  # 源字属于哪个敏感词
+            now_dfa_tree_saved = now_dfa_tree  # 备份now_dfa_tree
             for key in now_map.dict:
-                # 如果当前now_map的dict中存在终点（源字）（就是这里的key），则认为sentence从i到j-1的字符的源字为该字
+                # 如果当前now_map的dict中存在终点（源字）（就是这里的key），
+                # 则认为sentence从i到j-1的字符的源字 可能 为该字
+                # 即找到一个不确定是否为当前字符源字的源字
                 if now_map.dict[key].is_end:
                     if key in now_dfa_tree.dict:
                         find_origin_word = True
                         origin_word_is_end = now_dfa_tree.dict[key].is_end
                         origin_word_type = now_dfa_tree.dict[key].word_type
                         now_dfa_tree = now_dfa_tree.dict[key]
-                        break  # 找到第一个源字，直接break
+                        # 找到了源字，并且dfa_tree相应位置上有对应字，但不确定是否为敏感词的正确源字
                     else:
-                        # 找到了源字但是源字不在相应的dfa_tree位置上，查找敏感词失败，单步前进
-                        return 1
-            if find_origin_word:  # 找到源字了
-                # 把i到j的字放入word_stack
+                        # 找到了源字但是源字不在相应的dfa_tree位置上，看看其它源字
+                        continue
+                else:
+                    # 不是源字，看看下一个
+                    continue
+
+                # 找到了源字，并且dfa_tree相应位置上有对应字，但不确定是否为敏感词的正确源字
+                # 总之先把i到j的字放入word_stack
                 for i_temp in range(i, j):
                     word_stack.push(sentence[i_temp])
                 if origin_word_is_end:
@@ -182,12 +206,30 @@ def find_word(sentence, i, line_num):  # 从sentence下标i开始，目标是找
                         s_temp = word_stack.pop() + s_temp
                     ans.append("Line%d: <%s> %s" %
                                (line_num + 1, words[origin_word_type], s_temp))
-                    return len(s_temp)
+                    flag = True  # 走通敏感词，发出全局信号
+                    # j - i是最后一个源字对应的原文本长度
+                    return j - i
                 else:
                     # 找到源字，但不是敏感词最后一个字，继续找下一个
-                    i = j
-            else:  # 没找到源字，敏感词单字被打断/不完整，查找失败，单步前进
-                return 1
+                    # 问：如何判断走通了，如何判断没走通，并尝试下一个源字？
+                    # 答：全局信号signal
+                    l = find_word(sentence, j, line_num, now_dfa_tree)
+                    if flag:
+                        return j - i + l
+                    else:
+                        # 使用该源字没走通，恢复word_stack状态，并寻找下一个源字
+                        while word_stack.peek() in symbol:
+                            word_stack.pop()
+                        for j_temp in range(i, j):
+                            word_stack.pop()
+                        find_origin_word = False
+                        origin_word_is_end = False
+                        origin_word_type = -1
+                        now_dfa_tree = now_dfa_tree_saved
+                        # 恢复到选择源字前的状态
+                        continue
+
+            return 1  # 没有源字可以在dfa_tree上匹配，单步前进
 
 
         # lower_word = sentence[i].lower()  # 用小写形式查询，即sentence[i]全部改为lower_word
@@ -219,7 +261,7 @@ def deal_org():  # 处理文本，得到答案
         while i < len(sentence):
             if sentence[i].lower() in words_map.dict:  # 单字sentence[i]是敏感词某种情况的开头
                 word_stack = Stack()
-                i += find_word(sentence, i, line_num)
+                i += find_word(sentence, i, line_num, dfa_tree)
                 # 从下标i开始找敏感词，传输：句子，下标，映射表，行号
             else:
                 i += 1  # 无效符号，下一个

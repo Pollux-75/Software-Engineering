@@ -1,6 +1,7 @@
-Total: 336
+Total: 375
 Line2: <邪教> 邪教
 Line3: <法轮功> 法lun功
+Line8: <fuck> Fuck
 Line10: <法轮功> 法lun功
 Line10: <邪教> 邪教
 Line10: <法轮功> 法lun功
@@ -135,36 +136,67 @@ Line247: <fuck> f                 uck
 Line248: <fuck> f                 uck
 Line249: <邪教> 邪教
 Line252: <fuck> f                 uck
+Line253: <法轮功> FaLG
 Line253: <fuck> f                 uck
 Line253: <fuck> f                 uck
 Line254: <fuck> f435678u4567c!*&^%$#k
+Line254: <法轮功> FaLG
 Line255: <fuck> f435678u4567c!*&^%$#k
+Line255: <法轮功> FaLG
+Line256: <法轮功> FaLG
 Line256: <fuck> f435678u4567c!*&^%$#k
+Line257: <法轮功> FaLG
 Line257: <fuck> f435678u4567c!*&^%$#k
 Line262: <fuck> f435678u4567c!*&^%$#k
 Line262: <fuck> f435678u4567c!*&^%$#k
+Line263: <法轮功> FaLG
 Line263: <fuck> f！@#￥%…………&**uck
+Line264: <法轮功> FaLG
+Line264: <法轮功> FaLG
+Line265: <法轮功> FaLG
+Line267: <法轮功> FaLG
+Line268: <法轮功> FaLG
+Line269: <法轮功> FaLG
+Line270: <法轮功> FaLG
+Line271: <法轮功> FaLG
 Line272: <fuck> f！@#￥%…………&**uck
+Line272: <法轮功> FaLG
+Line273: <法轮功> FaLG
+Line275: <法轮功> FaLG
 Line275: <邪教> 邪教
 Line275: <fuck> f！@#￥%…………&**uck
 Line276: <fuck> f！@#￥%…………&**uck
+Line277: <法轮功> FaLG
+Line278: <法轮功> FaLG
 Line278: <邪教> 邪教
 Line279: <邪教> 邪教
+Line279: <法轮功> FaLG
 Line280: <邪教> 邪教
+Line280: <法轮功> FaLG
 Line280: <邪教> 邪教
 Line281: <邪教> 邪教
+Line281: <法轮功> FaLG
 Line282: <邪教> 邪教
 Line284: <邪教> 邪教
 Line285: <邪教> 邪教
+Line285: <法轮功> FaLG
+Line285: <法轮功> FaLG
+Line286: <法轮功> FaLG
 Line286: <邪教> 邪教
+Line286: <法轮功> FaLG
+Line287: <法轮功> 法轮g
 Line288: <邪教> 邪教
 Line289: <邪教> 邪教
 Line290: <邪教> 邪教
 Line291: <邪教> 邪教
+Line291: <法轮功> 法轮g
+Line292: <法轮功> 法轮g
 Line292: <邪教> 邪教
 Line293: <邪教> 邪教
+Line293: <法轮功> 法轮g
 Line294: <邪教> 邪教
 Line295: <邪教> 邪教
+Line296: <法轮功> 法轮g
 Line298: <邪教> 邪教
 Line299: <邪教> 邪教
 Line299: <邪教> 邪教
@@ -232,6 +264,7 @@ Line354: <法轮功> 法!@#$%^&*()_+轮功
 Line355: <法轮功> 法!@#$%^&*()_+轮功
 Line355: <fuck> fuck
 Line356: <法轮功> 法!@#$%^&*()_+轮功
+Line356: <fuck> FUCK
 Line357: <fuck> f                    uck
 Line358: <法轮功> 法!@#$%^&*()_+轮功
 Line359: <法轮功> 法!@#$%^&*()_+轮功
@@ -246,9 +279,15 @@ Line365: <法轮功> 法轮!@#$%^&*()_+功
 Line366: <邪教> 邪||||||||教
 Line366: <邪教> 邪||||||||教
 Line366: <法轮功> 法轮!@#$%^&*()_+功
+Line367: <法轮功> f轮功
 Line368: <邪教> 邪||||||||教
+Line368: <法轮功> f轮功
 Line368: <邪教> 邪||||||||教
+Line369: <法轮功> f轮功
+Line369: <法轮功> f轮功
+Line370: <法轮功> 法l功
 Line371: <邪教> 邪||||||||教
+Line373: <法轮功> 法l功
 Line378: <法轮功> 法!@#$%^&*()_+轮!@#$%^&*()_+功
 Line381: <fuck> fuck
 Line382: <法轮功> 法!@#$%^&*()_+轮!@#$%^&*()_+功
