@@ -1,5 +1,7 @@
 import sys
-from pypinyin import pinyin, lazy_pinyin, Style
+from pypinyin import pinyin, lazy_pinyin, Style  # 拼音库
+import changeCode  # 繁简体字库
+from chai_zi import chai_zi
 
 global file_in_words  # 读入的words文件
 global file_in_org  # 读入的org文件
@@ -62,12 +64,16 @@ class DFA:
             words_map.dict[word[0]] = DFA(word_type)  # 无则添加
         if word[0] not in words_map.dict[word[0]].dict:  # 映射表word[0]单字下，是否有终点word[0]
             words_map.dict[word[0]].dict[word[0]] = DFA(word_type, True)  # 无则添加
+        # 添加映射：字本身 -> 字本身
         if is_chinese(word[0]):  # word[0] 是否为中文
-            # 添加映射：字本身 -> 字本身
             add_full_pinyin_to_words_map(words_map, word[0], word_type)  # 对 映射表 添加 全拼音识别
             # 添加映射：全拼音 -> 字本身
-            add_title_pinyin_to_words_map(words_map, word[0], word_type) # 对 映射表 添加 首拼音识别
+            add_title_pinyin_to_words_map(words_map, word[0], word_type)  # 对 映射表 添加 首拼音识别
             # 添加映射：首拼音 -> 字本身
+            add_tradition_to_words_map(words_map, word[0], word_type)  # 对 映射表 添加 繁体字识别
+            # 添加映射：繁体字 -> 字本身
+            add_side_split_to_words_map(words_map, word[0], word_type)  # 对 映射表 添加 偏旁拆字识别
+            # 添加映射：偏旁拆字 -> 字本身
 
         if len(word) >= 2:  # 不是最后一个字
             self.dict[word[0]].add_sensitive_word(word.lstrip(word[0]), word_type)
@@ -96,6 +102,30 @@ def add_full_pinyin_to_words_map(now_map, single_word, word_type):
 def add_title_pinyin_to_words_map(now_map, single_word, word_type):
     single_word_pinyin = pinyin(single_word, style=Style.FIRST_LETTER)  # 转换首拼音
     for i in single_word_pinyin[0]:  # 每个拼音字母加入words_map
+        if i not in now_map.dict:
+            now_map.dict[i] = DFA(word_type)
+        now_map = now_map.dict[i]
+
+    if single_word not in now_map.dict:
+        now_map.dict[single_word] = DFA(word_type)
+        now_map.dict[single_word].is_end = True
+
+
+def add_tradition_to_words_map(now_map, single_word, word_type):
+    tradition_single_word = changeCode.toTraditionString(single_word)  # 转换繁体字
+    for i in tradition_single_word[0]:  # 每个繁体字加入words_map
+        if i not in now_map.dict:
+            now_map.dict[i] = DFA(word_type)
+        now_map = now_map.dict[i]
+
+    if single_word not in now_map.dict:
+        now_map.dict[single_word] = DFA(word_type)
+        now_map.dict[single_word].is_end = True
+
+
+def add_side_split_to_words_map(now_map, single_word, word_type):
+    side_split_single_word = chai_zi[single_word]  # 偏旁拆字
+    for i in side_split_single_word:  # 每个偏旁拆字加入words_map
         if i not in now_map.dict:
             now_map.dict[i] = DFA(word_type)
         now_map = now_map.dict[i]
