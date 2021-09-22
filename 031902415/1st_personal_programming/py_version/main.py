@@ -18,6 +18,9 @@ global flag  # 全局信号，判断某个敏感词是否走通
 global homo  # 全局信号，判断是否有同音字在映射表中
 global homo_now_map  # 全局信号，在出现同音字的时候，停在拼音的最后一个字母
 
+# 基本思想：朴素的敏感词查询表 + 详细的敏感词映射表
+
+# 半角，数字，全角符号
 symbol = ['!', '@', '#', '$', '%', '^', '&', '*', '(', ')', '_', '+', '-', '=',
           '|', '\\', '[', ']', '{', '}', ';', ':', "'", '"', ',', '.', '<', '>',
           '/', '?', '`', '~', '1', '2', '3', '4', '5', '6', '7', '8', '9', '0',
@@ -26,9 +29,7 @@ symbol = ['!', '@', '#', '$', '%', '^', '&', '*', '(', ')', '_', '+', '-', '=',
           '《', '》', '/', '？', '·', '~', ' ', '—']
 
 
-# 半角，数字，全角符号
-
-
+# 模拟类
 class Stack:  # 惊了，stack竟然不是python内置的数据结构
     def __init__(self):
         self.items = []
@@ -51,12 +52,14 @@ class Stack:  # 惊了，stack竟然不是python内置的数据结构
         return len(self.items)
 
 
+# DFA树结点
 class DFA:
     def __init__(self, word_type=-1, is_end=False):
         self.dict = {}
         self.is_end = is_end
         self.word_type = word_type
 
+    # 建立敏感词查询表、敏感词映射表
     def add_sensitive_word(self, word, word_type):
         if not word[0] in self.dict:  # 若该字不在dfa_tree中，则增加该字
             self.dict[word[0]] = DFA(word_type)  # 对 查询表 添加 基本敏感字 识别
@@ -83,12 +86,14 @@ class DFA:
             self.dict[word[0]].is_end = True
 
 
+# 是否为中文
 def is_chinese(ch):
     if '\u4e00' <= ch <= '\u9fff':
         return True
     return False
 
 
+# 在敏感词映射表中是否存在同音字
 def homophonic(single_word, now_map):
     global homo
     global homo_now_map
@@ -110,6 +115,7 @@ def homophonic(single_word, now_map):
     return homo
 
 
+# 添加 全拼音识别 到 敏感词映射表
 def add_full_pinyin_to_words_map(now_map, single_word, word_type):
     single_word_pinyin = lazy_pinyin(single_word)  # 转换全拼音
     for i in single_word_pinyin[0]:  # 每个拼音字母加入words_map
@@ -122,6 +128,7 @@ def add_full_pinyin_to_words_map(now_map, single_word, word_type):
         now_map.dict[single_word].is_end = True
 
 
+# 添加 首拼音识别 到 敏感词映射表
 def add_title_pinyin_to_words_map(now_map, single_word, word_type):
     single_word_pinyin = pinyin(single_word, style=Style.FIRST_LETTER)  # 转换首拼音
     for i in single_word_pinyin[0]:  # 每个拼音字母加入words_map
@@ -134,6 +141,7 @@ def add_title_pinyin_to_words_map(now_map, single_word, word_type):
         now_map.dict[single_word].is_end = True
 
 
+# 添加 繁体字识别 到 敏感词映射表
 def add_tradition_to_words_map(now_map, single_word, word_type):
     tradition_single_word = changeCode.toTraditionString(single_word)  # 转换繁体字
     for i in tradition_single_word[0]:  # 每个繁体字加入words_map
@@ -146,6 +154,7 @@ def add_tradition_to_words_map(now_map, single_word, word_type):
         now_map.dict[single_word].is_end = True
 
 
+# 添加 拆分字识别 到 敏感词映射表
 def add_side_split_to_words_map(now_map, single_word, word_type):
     side_split_single_word = chai_zi[single_word]  # 偏旁拆字
     for i in side_split_single_word:  # 每个偏旁拆字加入words_map
@@ -158,29 +167,42 @@ def add_side_split_to_words_map(now_map, single_word, word_type):
         now_map.dict[single_word].is_end = True
 
 
-def read_file():  # 读入文件
+# 搞点初始化
+def do_some_initial():
+    global ans
+    global dfa_tree
+    global words_map
+
+    ans = []
+    dfa_tree = DFA()  # 初始化敏感词树
+    words_map = DFA()  # 初始化映射表
+
+
+# 读文件
+def read_file():
     global file_in_words
     global file_in_org
     global file_out_ans
     global words
     global org
 
-    # file_in_words = open(sys.argv[0], 'r', encoding='utf-8')
-    # file_in_org = open(sys.argv[1], 'r', encoding='utf-8')
-    # file_out_ans = open(sys.argv[2], 'w', encoding='utf-8')
+    file_in_words = open(sys.argv[0], 'r', encoding='utf-8')
+    file_in_org = open(sys.argv[1], 'r', encoding='utf-8')
+    file_out_ans = open(sys.argv[2], 'w', encoding='utf-8')
 
-    s1 = "words.txt"
-    s2 = "org.txt"
-    s3 = "ans.txt"
-    file_in_words = open(s1, 'r', encoding='utf-8')
-    file_in_org = open(s2, 'r', encoding='utf-8')
-    file_out_ans = open(s3, 'w', encoding='utf-8')
+    # s1 = "words.txt"
+    # s2 = "org.txt"
+    # s3 = "ans.txt"
+    # file_in_words = open(s1, 'r', encoding='utf-8')
+    # file_in_org = open(s2, 'r', encoding='utf-8')
+    # file_out_ans = open(s3, 'w', encoding='utf-8')
 
     words = file_in_words.readlines()  # 得到敏感词表
     org = file_in_org.readlines()  # 得到要检测的文章
 
 
-def write_file():  # 输出文件
+# 写文件
+def write_file():
     ans.insert(0, "Total: %d" % len(ans))
     for i in ans:
         file_out_ans.write(i + '\n')
@@ -190,6 +212,7 @@ def write_file():  # 输出文件
     file_out_ans.close()
 
 
+# 处理敏感词列表，得到 敏感词查询表 + 敏感词映射表
 def deal_words():  # 处理敏感词表，建立敏感词查询表
     global dfa_tree
 
@@ -200,6 +223,7 @@ def deal_words():  # 处理敏感词表，建立敏感词查询表
         dfa_tree.add_sensitive_word(word, word_type)  # 把word放入敏感词查询表
 
 
+# 对句子寻找敏感词
 def find_word(sentence, i, line_num, now_dfa_tree):  # 从sentence下标i开始，目标是找到整个敏感词
     global word_stack
     global flag
@@ -366,6 +390,7 @@ def find_word(sentence, i, line_num, now_dfa_tree):  # 从sentence下标i开始�
             return 1  # 没有找到源字可以在dfa_tree上匹配，单步前进
 
 
+# 对文章寻找敏感词
 def deal_org():  # 处理文本，得到答案
     global word_stack
 
@@ -383,22 +408,12 @@ def deal_org():  # 处理文本，得到答案
                 i += 1  # 无效符号，下一个
 
 
-def do_some_initial():
-    global ans
-    global dfa_tree
-    global words_map
-
-    ans = []
-    dfa_tree = DFA()  # 初始化敏感词树
-    words_map = DFA()  # 初始化映射表
-
-
 if __name__ == '__main__':
     do_some_initial()  # 初始化
 
     read_file()  # 输入
 
-    deal_words()  # 处理敏感词：建立敏感词表
+    deal_words()  # 处理敏感词：建立 敏感词查询表 + 敏感词映射表
 
     deal_org()  # 处理文本：检查敏感词
 
