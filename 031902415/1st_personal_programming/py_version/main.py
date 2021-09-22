@@ -11,7 +11,6 @@ global org  # 要检测的文章的内容
 global ans  # 要输出的答案
 
 global dfa_tree  # 建成的敏感词树
-global symbol  # 无效符号集合
 global word_stack  # 词栈，用来保存检查过程中发现的一个敏感词
 global words_map  # 映射表，保存敏感词各个单字的各种情况，注意是单字，末尾以原版敏感词单字为结尾
 global flag  # 全局信号，判断某个敏感词是否走通
@@ -20,7 +19,7 @@ global homo_now_map  # 全局信号，在出现同音字的时候，停在拼音
 
 # 基本思想：朴素的敏感词查询表 + 详细的敏感词映射表
 
-# 半角，数字，全角符号
+# 半角，数字，全角无效符号集合
 symbol = ['!', '@', '#', '$', '%', '^', '&', '*', '(', ')', '_', '+', '-', '=',
           '|', '\\', '[', ']', '{', '}', ';', ':', "'", '"', ',', '.', '<', '>',
           '/', '?', '`', '~', '1', '2', '3', '4', '5', '6', '7', '8', '9', '0',
@@ -186,9 +185,12 @@ def read_file():
     global words
     global org
 
-    file_in_words = open(sys.argv[0], 'r', encoding='utf-8')
-    file_in_org = open(sys.argv[1], 'r', encoding='utf-8')
-    file_out_ans = open(sys.argv[2], 'w', encoding='utf-8')
+    try:
+        file_in_words = open(sys.argv[1], 'r', encoding='utf-8')
+        file_in_org = open(sys.argv[2], 'r', encoding='utf-8')
+        file_out_ans = open(sys.argv[3], 'w', encoding='utf-8')
+    except FileNotFoundError:
+        print("发生异常：找不到文件！")
 
     # s1 = "words.txt"
     # s2 = "org.txt"
@@ -244,8 +246,9 @@ def find_word(sentence, i, line_num, now_dfa_tree):  # 从sentence下标i开始�
         now_map = words_map
 
         # 第一个不是干扰符号的字，不在映射表中，则表示敏感词被“非干扰符号”分割了
-        if j >= len(sentence) or (sentence[j].lower() not in now_map.dict \
-                and (is_chinese(sentence[j]) and not homophonic(sentence[j], now_map))):
+        if j >= len(sentence) \
+                or (sentence[j].lower() not in now_map.dict
+                    and (is_chinese(sentence[j]) and not homophonic(sentence[j], now_map))):
             return 1  # 敏感词被打断，单步前进
         else:
             # 这里认为单字不能被干扰字符打断，如果有单字，应当是完整的，跟着映射表走直到（找到源字）或者（被打断）
@@ -260,9 +263,6 @@ def find_word(sentence, i, line_num, now_dfa_tree):  # 从sentence下标i开始�
                 j += 1
             if self_in_map:
                 # 走不通了，当前j落在走不通的位置，now_map是最后走的通的位置
-                find_origin_word = False  # 是否找到源字
-                origin_word_is_end = False  # 源字是否为某个敏感词的最后一个字
-                origin_word_type = -1  # 源字属于哪个敏感词
                 now_dfa_tree_saved = now_dfa_tree  # 备份now_dfa_tree
                 for key in now_map.dict:
                     # 如果当前now_map的dict中存在终点（源字）（就是这里的key），
@@ -270,7 +270,6 @@ def find_word(sentence, i, line_num, now_dfa_tree):  # 从sentence下标i开始�
                     # 即找到一个不确定是否为当前字符源字的源字
                     if now_map.dict[key].is_end:
                         if key in now_dfa_tree.dict:
-                            find_origin_word = True
                             origin_word_is_end = now_dfa_tree.dict[key].is_end
                             origin_word_type = now_dfa_tree.dict[key].word_type
                             now_dfa_tree = now_dfa_tree.dict[key]
@@ -300,24 +299,21 @@ def find_word(sentence, i, line_num, now_dfa_tree):  # 从sentence下标i开始�
                         # 找到源字，但不是敏感词最后一个字，继续找下一个
                         # 问：如何判断走通了，如何判断没走通，并尝试下一个源字？
                         # 答：全局信号signal
-                        l = find_word(sentence, j, line_num, now_dfa_tree)
+                        l_word = find_word(sentence, j, line_num, now_dfa_tree)
                         if flag:
                             # 走通了，直接跳出程序
-                            return j - i + l
+                            return j - i + l_word
                         else:
                             # 使用该源字没走通，恢复word_stack状态，并寻找下一个源字
                             while word_stack.peek() in symbol:
                                 word_stack.pop()
                             for j_temp in range(i, j):
                                 word_stack.pop()
-                            find_origin_word = False
-                            origin_word_is_end = False
-                            origin_word_type = -1
                             now_dfa_tree = now_dfa_tree_saved
                             # 恢复到选择源字前的状态
                             continue
 
-# ---------------------------------------------------------------- #
+            # ---------------------------------------------------------------- #
 
             j = j_saved
             now_map = now_map_saved
@@ -330,9 +326,6 @@ def find_word(sentence, i, line_num, now_dfa_tree):  # 从sentence下标i开始�
                 j += 1
             if homo_in_map:
                 # 走不通了，当前j落在走不通的位置，now_map是最后走的通的位置
-                find_origin_word = False  # 是否找到源字
-                origin_word_is_end = False  # 源字是否为某个敏感词的最后一个字
-                origin_word_type = -1  # 源字属于哪个敏感词
                 now_dfa_tree_saved = now_dfa_tree  # 备份now_dfa_tree
                 for key in now_map.dict:
                     # 如果当前now_map的dict中存在终点（源字）（就是这里的key），
@@ -340,7 +333,6 @@ def find_word(sentence, i, line_num, now_dfa_tree):  # 从sentence下标i开始�
                     # 即找到一个不确定是否为当前字符源字的源字
                     if now_map.dict[key].is_end:
                         if key in now_dfa_tree.dict:
-                            find_origin_word = True
                             origin_word_is_end = now_dfa_tree.dict[key].is_end
                             origin_word_type = now_dfa_tree.dict[key].word_type
                             now_dfa_tree = now_dfa_tree.dict[key]
@@ -370,19 +362,16 @@ def find_word(sentence, i, line_num, now_dfa_tree):  # 从sentence下标i开始�
                         # 找到源字，但不是敏感词最后一个字，继续找下一个
                         # 问：如何判断走通了，如何判断没走通，并尝试下一个源字？
                         # 答：全局信号signal
-                        l = find_word(sentence, j, line_num, now_dfa_tree)
+                        l_word = find_word(sentence, j, line_num, now_dfa_tree)
                         if flag:
                             # 走通了，直接跳出程序
-                            return j - i + l
+                            return j - i + l_word
                         else:
                             # 使用该源字没走通，恢复word_stack状态，并寻找下一个源字
                             while word_stack.peek() in symbol:
                                 word_stack.pop()
                             for j_temp in range(i, j):
                                 word_stack.pop()
-                            find_origin_word = False
-                            origin_word_is_end = False
-                            origin_word_type = -1
                             now_dfa_tree = now_dfa_tree_saved
                             # 恢复到选择源字前的状态
                             continue
